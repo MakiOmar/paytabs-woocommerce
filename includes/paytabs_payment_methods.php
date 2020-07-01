@@ -35,10 +35,8 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         $this->description = $this->get_option('description');
         $this->enabled = $this->get_option('enabled');
 
-        $this->merchant_email = $this->get_option('merchant_email');
-        $this->secret_key = $this->get_option('secret_key');
-        $this->profile_id = 47170;
-        $this->server_key = 'SRJNLKK2Z2-HWRGM6JDZM-MGMGGNW9JZ';
+        $this->profile_id = $this->get_option('profile_id');
+        $this->server_key = $this->get_option('server_key');
 
         // This action hook saves the settings
         add_action("woocommerce_update_options_payment_gateways_{$this->id}", array($this, 'process_admin_options'));
@@ -96,17 +94,17 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
                 'description' => __('This controls the description which the user sees during checkout.', 'PayTabs'),
                 'default'     => __('Pay securely through PayTabs Secure Servers.', 'PayTabs'),
             ),
-            'merchant_email' => array(
-                'title'       => __('Merchant e-Mail', 'PayTabs'),
+            'profile_id' => array(
+                'title'       => __('Profile ID', 'PayTabs'),
                 'type'        => 'text',
-                'description' => __('Please enter the E-Mail of your PayTabs Merchant account.', 'PayTabs'),
+                'description' => __('Please enter the "Profile ID" of your PayTabs Merchant account.', 'PayTabs'),
                 'default'     => '',
                 'required'    => true
             ),
-            'secret_key' => array(
-                'title'       => __('Secret Key', 'PayTabs'),
+            'server_key' => array(
+                'title'       => __('Server Key', 'PayTabs'),
                 'type'        => 'text',
-                'description' => __('Please enter your PayTabs Secret Key. You can find the secret key on your Merchant’s Portal', 'PayTabs'),
+                'description' => __('Please enter your PayTabs "Server Key". You can find it on your Merchant’s Portal', 'PayTabs'),
                 'default'     => '',
                 'required'    => true
             )
@@ -187,36 +185,21 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         if (!$payment_reference) return;
 
         $_paytabsApi = PaytabsApi::getInstance($this->profile_id, $this->server_key);
-        $result = $_paytabsApi->verify_payment($payment_reference);
-        $valid_redirect = $_paytabsApi->is_valid_redirect($_POST);
+        $verify_response = $_paytabsApi->verify_payment($payment_reference);
+        // $valid_redirect = $_paytabsApi->is_valid_redirect($_POST);
 
-        $_logVerify = json_encode($_POST);
+        $_logVerify = json_encode($verify_response);
 
-        $success = $_POST['respStatus'] == 'A';
-        $message = $_POST['respMessage'];
+        $success = $verify_response->success;
+        $message = $verify_response->message;
+
         $order_id = $order->get_id();
+        $orderId = $verify_response->cart_id;
 
-        if (!$valid_redirect) {
-            PaytabsHelper::log("callback failed for Order {$order_id}, response [{$_logVerify}]", 3);
-            wc_add_notice($message, 'error');
-
-            // return false;
-            // wp_redirect(get_site_url());
+        if ($orderId != $order_id) {
+            PaytabsHelper::log("callback failed for Order {$order_id}, Order mismatch [{$_logVerify}]", 3);
             return;
         }
-
-        // $orderId = $result->reference_no;
-        // if ($orderId != $order_id) {
-        //     PaytabsHelper::log("callback failed for Order {$order_id}, Order mismatch [{$_logVerify}]", 3);
-        //     return;
-        // }
-
-        // $order = wc_get_order($orderId);
-
-        // if (!$order) {
-        //     PaytabsHelper::log("callback failed for Order {$order_id}, Order not found, response [{$_logVerify}]", 3);
-        //     return;
-        // }
 
         if ($success) {
             $this->orderSuccess($order, $message);

@@ -903,6 +903,8 @@ class PaytabsApi
         $values['tran_ref'] = $tran_reference;
         $verify = json_decode($this->sendRequest(self::URL_QUERY, $values));
 
+        $verify = $this->enhanceVerify($verify);
+
         return $verify;
     }
 
@@ -963,10 +965,14 @@ class PaytabsApi
         if (!$verify) {
             $_verify = new stdClass();
             $_verify->success = false;
-            $_verify->result = 'Verifying paytabs payment failed';
+            $_verify->message = 'Verifying paytabs payment failed';
         } else {
-
-            $_verify->success = isset($verify->response_code) && $verify->response_code == 100;
+            if (isset($verify->payment_result)) {
+                $_verify->success = $verify->payment_result->response_status == "A";
+            } else {
+                $_verify->success = false;
+            }
+            $_verify->message = $verify->payment_result->response_message;
         }
 
         return $_verify;
