@@ -711,6 +711,11 @@ class PaytabsHolder2
     private $customer_details;
 
     /**
+     * hide_shipping
+     */
+    private $hide_shipping;
+
+    /**
      * pan
      * expiry_month
      * expiry_year
@@ -741,6 +746,10 @@ class PaytabsHolder2
             $this->customer_details
         );
 
+        if ($this->hide_shipping) {
+            $all = array_merge($all, $this->hide_shipping);
+        }
+
         return $all;
     }
 
@@ -754,7 +763,7 @@ class PaytabsHolder2
 
     public function set01PaymentCode($code)
     {
-        $this->payment_code = ['payment_type' => $code];
+        $this->payment_code = ['payment_methods' => $code];
 
         return $this;
     }
@@ -811,6 +820,15 @@ class PaytabsHolder2
         $this->urls = [
             'return'   => $return_url,
             'callback' => $callback_url,
+        ];
+
+        return $this;
+    }
+
+    public function set06HideShipping($on = false)
+    {
+        $this->hide_shipping = [
+            'hide_shipping' => $on,
         ];
 
         return $this;
