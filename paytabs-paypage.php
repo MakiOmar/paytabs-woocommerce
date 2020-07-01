@@ -51,7 +51,7 @@ function woocommerce_paytabs_init()
     return;
   }
 
-  require_once PAYTABS_PAYPAGE_DIR . "includes/paytabs_core.php";
+  require_once PAYTABS_PAYPAGE_DIR . "includes/paytabs_core2.php";
   require_once PAYTABS_PAYPAGE_DIR . "includes/paytabs_payment_methods.php";
   require_once PAYTABS_PAYPAGE_DIR . "includes/paytabs_gateways.php";
 

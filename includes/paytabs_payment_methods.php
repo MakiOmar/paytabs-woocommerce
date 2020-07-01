@@ -37,6 +37,8 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
 
         $this->merchant_email = $this->get_option('merchant_email');
         $this->secret_key = $this->get_option('secret_key');
+        $this->profile_id = 47170;
+        $this->server_key = 'SRJNLKK2Z2-HWRGM6JDZM-MGMGGNW9JZ';
 
         // This action hook saves the settings
         add_action("woocommerce_update_options_payment_gateways_{$this->id}", array($this, 'process_admin_options'));
@@ -130,7 +132,7 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
 
         $values = WooCommerce2 ? $this->prepareOrder2($order) : $this->prepareOrder($order);
 
-        $_paytabsApi = PaytabsApi::getInstance($this->merchant_email, $this->secret_key);
+        $_paytabsApi = PaytabsApi::getInstance($this->profile_id, $this->server_key);
         $paypage = $_paytabsApi->create_pay_page($values);
 
 
@@ -140,7 +142,7 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         // $response = wp_remote_post('{payment processor endpoint}', $args);
 
         if ($paypage->success) {
-            $payment_url = $paypage->payment_url;
+            $payment_url = $paypage->redirect_url;
 
             return array(
                 'result'    => 'success',
@@ -151,7 +153,7 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
             $_logParams = json_encode($values);
             PaytabsHelper::log("create PayPage failed for Order {$order_id}, [{$_logPaypage}], [{$_logParams}]", 3);
 
-            $errorMessage = $paypage->result;
+            $errorMessage = $paypage->message;
 
             wc_add_notice($errorMessage, 'error');
             return null;
@@ -160,16 +162,16 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
 
     private function checkCallback()
     {
-        if (isset($_REQUEST['payment_reference'], $_REQUEST['key'])) {
-            $payment_reference = $_REQUEST['payment_reference'];
-            $key = $_REQUEST['key'];
+        if (isset($_POST['tranRef'], $_POST['cartId'])) {
+            $payment_reference = $_POST['tranRef'];
+            $orderId = $_POST['cartId'];
 
-            $orderId = wc_get_order_id_by_order_key($key);
+            // $orderId = wc_get_order_id_by_order_key($key);
             $order = wc_get_order($orderId);
             if ($order) {
                 $payment_id = $this->getPaymentMethod($order);
                 if ($payment_id == $this->id) {
-                    $this->callback($payment_reference, $orderId);
+                    $this->callback($payment_reference, $order);
                 }
             } else {
                 PaytabsHelper::log("callback failed for Order {$orderId}, payemnt_reference [{$payment_reference}]", 3);
@@ -180,19 +182,21 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
     /**
      * In case you need a webhook, like PayPal IPN etc
      */
-    public function callback($payment_reference, $order_id)
+    public function callback($payment_reference, $order)
     {
         if (!$payment_reference) return;
 
-        $_paytabsApi = PaytabsApi::getInstance($this->merchant_email, $this->secret_key);
+        $_paytabsApi = PaytabsApi::getInstance($this->profile_id, $this->server_key);
         $result = $_paytabsApi->verify_payment($payment_reference);
+        $valid_redirect = $_paytabsApi->is_valid_redirect($_POST);
 
-        $_logVerify = json_encode($result);
+        $_logVerify = json_encode($_POST);
 
-        $success = $result->success;
-        $message = $result->result;
+        $success = $_POST['respStatus'] == 'A';
+        $message = $_POST['respMessage'];
+        $order_id = $order->get_id();
 
-        if (!isset($result->reference_no)) {
+        if (!$valid_redirect) {
             PaytabsHelper::log("callback failed for Order {$order_id}, response [{$_logVerify}]", 3);
             wc_add_notice($message, 'error');
 
@@ -201,18 +205,18 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
             return;
         }
 
-        $orderId = $result->reference_no;
-        if ($orderId != $order_id) {
-            PaytabsHelper::log("callback failed for Order {$order_id}, Order mismatch [{$_logVerify}]", 3);
-            return;
-        }
+        // $orderId = $result->reference_no;
+        // if ($orderId != $order_id) {
+        //     PaytabsHelper::log("callback failed for Order {$order_id}, Order mismatch [{$_logVerify}]", 3);
+        //     return;
+        // }
 
-        $order = wc_get_order($orderId);
+        // $order = wc_get_order($orderId);
 
-        if (!$order) {
-            PaytabsHelper::log("callback failed for Order {$order_id}, Order not found, response [{$_logVerify}]", 3);
-            return;
-        }
+        // if (!$order) {
+        //     PaytabsHelper::log("callback failed for Order {$order_id}, Order not found, response [{$_logVerify}]", 3);
+        //     return;
+        // }
 
         if ($success) {
             $this->orderSuccess($order, $message);
@@ -293,7 +297,6 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         // $return_url = "$siteUrl?wc-api=paytabs_callback&order={$order->id}";
 
         $products = $order->get_items();
-
         $items_arr = array_map(function ($p) {
             return [
                 'name' => $p->get_name(),
@@ -316,49 +319,26 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         $lang_code = get_locale();
         $lang = ($lang_code == 'ar' || substr($lang_code, 0, 3) == 'ar_') ? 'Arabic' : 'English';
 
-        $holder = new PaytabsHolder();
+        $holder = new PaytabsHolder2();
         $holder
             ->set01PaymentCode($this->_code)
-            ->set02ReferenceNum($order->get_id())
-            ->set03InvoiceInfo($order->get_formatted_billing_full_name(), $lang)
-            ->set04Payment(
-                $currency,
-                $amount,
-                $other_charges,
-                $discount
-            )
-            ->set05Products($items_arr)
-            ->set06CustomerInfo(
-                $order->get_billing_first_name(),
-                $order->get_billing_last_name(),
-                $phoneext,
-                $telephone,
-                $order->get_billing_email()
-            )
-            ->set07Billing(
+            ->set02Transaction('sale', 'ecom')
+            ->set03Cart($order->get_id(), $currency, $amount, json_encode($items_arr))
+            ->set04CustomerDetails(
+                $order->get_formatted_billing_full_name(),
+                $order->get_billing_email(),
                 $addressBilling,
-                $order->get_billing_state(),
                 $order->get_billing_city(),
-                $order->get_billing_postcode(),
-                $countryBilling
+                $order->get_billing_state(),
+                $countryBilling,
+                $ip_customer
             )
-            ->set08Shipping(
-                $order->get_shipping_first_name(),
-                $order->get_shipping_last_name(),
-                $addressShipping,
-                $order->get_shipping_state(),
-                $order->get_shipping_city(),
-                $order->get_shipping_postcode(),
-                $countryShipping
-            )
-            ->set09URLs(
-                $siteUrl,
-                $return_url
-            )
-            ->set10CMSVersion("WooCommerce {$woocommerce->version}")
-            ->set11IPCustomer($ip_customer);
+            ->set05URLs(
+                $return_url,
+                null
+            );
 
-        $post_arr = $holder->pt_build(true);
+        $post_arr = $holder->pt_build();
 
         return $post_arr;
     }
