@@ -763,7 +763,7 @@ class PaytabsHolder2
 
     public function set01PaymentCode($code)
     {
-        $this->payment_code = ['payment_methods' => $code];
+        $this->payment_code = ['payment_methods' => [$code]];
 
         return $this;
     }
@@ -783,7 +783,7 @@ class PaytabsHolder2
         $this->cart = [
             'cart_id'          => "$cart_id",
             'cart_currency'    => "$currency",
-            'cart_amount'      => $amount,
+            'cart_amount'      => (float) $amount,
             'cart_description' => $cart_description,
         ];
 
@@ -905,8 +905,8 @@ class PaytabsApi
 
     function create_pay_page($values)
     {
-        $serverIP = getHostByName(getHostName());
-        $values['ip_merchant'] = PaytabsHelper::getNonEmpty($serverIP, $_SERVER['SERVER_ADDR'], 'NA');
+        // $serverIP = getHostByName(getHostName());
+        // $values['ip_merchant'] = PaytabsHelper::getNonEmpty($serverIP, $_SERVER['SERVER_ADDR'], 'NA');
 
         // $values['ip_customer'] = PaytabsHelper::getNonEmpty($values['ip_customer'], $_SERVER['REMOTE_ADDR'], 'NA');
 
@@ -958,8 +958,7 @@ class PaytabsApi
     /** start: Local calls */
 
     /**
-     * paypage structure: null || stdClass->[result | details, response_code, payment_url, p_id]
-     * @return paypage structure: stdClass->[success, result, response_code, payment_url, p_id]
+     * 
      */
     private function enhance($paypage)
     {
