@@ -2,7 +2,7 @@
 
 /**
  * PayTabs 2 PHP SDK
- * Version: 1.0.0
+ * Version: 1.0.1
  * 
  * Features:
  *  1- Create paypage
@@ -798,6 +798,10 @@ class PaytabsHolder2
         PaytabsHelper::pt_fillIfEmpty($city);
 
         $this->_fill($state, $city, 'NA');
+
+        if (!$ip) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
 
         //
 
