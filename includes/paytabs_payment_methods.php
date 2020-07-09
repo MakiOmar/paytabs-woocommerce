@@ -298,16 +298,15 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         // $cdetails = PaytabsHelper::getCountryDetails($order->get_billing_country());
         // $phoneext = $cdetails['phone'];
 
-        // $telephone = $order->get_billing_phone();
+        $telephone = $order->get_billing_phone();
 
         $countryBilling = PaytabsHelper::countryGetiso3($order->get_billing_country());
-        // $countryShipping = PaytabsHelper::countryGetiso3($order->get_shipping_country());
+        $countryShipping = PaytabsHelper::countryGetiso3($order->get_shipping_country());
 
         $addressBilling = trim($order->get_billing_address_1() . ' ' . $order->get_billing_address_2());
-        // $addressShipping = trim($order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2());
+        $addressShipping = trim($order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2());
 
-        // $lang_code = get_locale();
-        // $lang = ($lang_code == 'ar' || substr($lang_code, 0, 3) == 'ar_') ? 'Arabic' : 'English';
+        $lang_code = get_locale();
 
         $holder = new PaytabsHolder2();
         $holder
@@ -317,16 +316,31 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
             ->set04CustomerDetails(
                 $order->get_formatted_billing_full_name(),
                 $order->get_billing_email(),
+                $telephone,
                 $addressBilling,
                 $order->get_billing_city(),
                 $order->get_billing_state(),
                 $countryBilling,
+                $order->get_billing_postcode(),
                 $ip_customer
             )
-            ->set05URLs(
+            ->set05ShippingDetails(
+                $order->get_formatted_shipping_full_name(),
+                $order->get_billing_email(),
+                null,
+                $addressShipping,
+                $order->get_shipping_city(),
+                $order->get_shipping_state(),
+                $countryShipping,
+                $order->get_shipping_postcode(),
+                null
+            )
+            ->set06HideShipping(false)
+            ->set07URLs(
                 $return_url,
                 null
-            );
+            )
+            ->set08Lang($lang_code);
 
         $post_arr = $holder->pt_build();
 
@@ -371,16 +385,15 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
         // $cdetails = PaytabsHelper::getCountryDetails($order->billing_country);
         // $phoneext = $cdetails['phone'];
 
-        // $telephone = $order->billing_phone;
+        $telephone = $order->billing_phone;
 
         $countryBilling = PaytabsHelper::countryGetiso3($order->billing_country);
-        // $countryShipping = PaytabsHelper::countryGetiso3($order->shipping_country);
+        $countryShipping = PaytabsHelper::countryGetiso3($order->shipping_country);
 
         $addressBilling = trim($order->billing_address_1 . ' ' . $order->billing_address_2);
-        // $addressShipping = trim($order->shipping_address_1 . ' ' . $order->shipping_address_2);
+        $addressShipping = trim($order->shipping_address_1 . ' ' . $order->shipping_address_2);
 
-        // $lang_code = get_locale();
-        // $lang = ($lang_code == 'ar' || substr($lang_code, 0, 3) == 'ar_') ? 'Arabic' : 'English';
+        $lang_code = get_locale();
 
         $holder = new PaytabsHolder2();
         $holder
@@ -390,16 +403,31 @@ class WC_Gateway_Paytabs extends WC_Payment_Gateway
             ->set04CustomerDetails(
                 $order->get_formatted_billing_full_name(),
                 $order->billing_email,
+                $telephone,
                 $addressBilling,
                 $order->billing_city,
                 $order->billing_state,
                 $countryBilling,
-                ''
+                $order->billing_postcode,
+                null
             )
-            ->set05URLs(
+            ->set05ShippingDetails(
+                $order->get_formatted_shipping_full_name(),
+                $order->billing_email,
+                null,
+                $addressShipping,
+                $order->shipping_city,
+                $order->shipping_state,
+                $countryShipping,
+                $order->shipping_postcode,
+                null
+            )
+            ->set06HideShipping(false)
+            ->set07URLs(
                 $return_url,
                 null
-            );
+            )
+            ->set08Lang($lang_code);
 
         $post_arr = $holder->pt_build();
 
