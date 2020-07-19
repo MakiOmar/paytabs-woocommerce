@@ -1,0 +1,122 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: WooCommerce Credit Card Payment Gateway - PayTabs\n"
+"POT-Creation-Date: 2020-07-19 12:14+0200\n"
+"PO-Revision-Date: 2020-07-19 12:14+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: paytabs_creditcard_wc.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: paytabs_creditcard_wc.php:73
+msgid "Enable/Disable"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:75
+msgid "Enable PayTabs Payment Gateway ."
+msgstr ""
+
+#: paytabs_creditcard_wc.php:78
+msgid "Title:"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:80 paytabs_creditcard_wc.php:85
+msgid ""
+"Making any changes to the above may result in suspension or termination of "
+"your PayTabs Merchant Account."
+msgstr ""
+
+#. Author of the plugin/theme
+#: paytabs_creditcard_wc.php:81 paytabs_creditcard_wc.php:120
+msgid "PayTabs"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:83
+msgid "Description:"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:86
+msgid ""
+"Pay securely by Credit or Debit card or internet banking through PayTabs "
+"Secure Servers."
+msgstr ""
+
+#: paytabs_creditcard_wc.php:88
+msgid "Email"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:91
+msgid "Please enter the email id of your PayTabs merchant account."
+msgstr ""
+
+#: paytabs_creditcard_wc.php:96
+msgid "Secret Key"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:100
+msgid ""
+"Please enter your PayTabs Secret Key. You can find the secret key on your "
+"Merchant’s Dashboard >> PayTabs Services >> ecommerce Plugins and API.\n"
+"\n"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:106
+msgid "WebSite"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:109
+msgid ""
+"Please enter your Website; Your SITE URL MUST match to the website URL you "
+"provided in your PayTabs merchant account (Case Sensitive).\n"
+"For Demo Users: You can edit your site URL by going to “My Profile” and "
+"clicking on edit, enter your correct site URL and click on Save.\n"
+"For Live Merchants: You can use the website that you have submitted in the "
+"Go-Live application. If you need to edit/change the site URL, you can send a "
+"request to "
+msgstr ""
+
+#: paytabs_creditcard_wc.php:355
+msgid "Transaction declined ."
+msgstr ""
+
+#: paytabs_creditcard_wc.php:466
+msgid "Payment Completed"
+msgstr ""
+
+#: paytabs_creditcard_wc.php:471
+msgid ""
+"Thank you for shopping with us. Your account has been charged and your "
+"transaction is successful.\n"
+"            We will be shipping your order to you soon."
+msgstr ""
+
+#: paytabs_creditcard_wc.php:480
+msgid "Payment Cancelled"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "WooCommerce Credit Card Payment Gateway - PayTabs"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.paytabs.com/plugin"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"PayTabs Credit Card Payment gateway for woocommerce. This plugin supports "
+"woocommerce version 2.0.0 or greater version."
+msgstr ""
